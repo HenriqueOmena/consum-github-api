@@ -1,38 +1,66 @@
-import React from 'react';
+/* eslint-disable camelcase */
+import React, { FormEvent, useState } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
 import { Title, Form, Repositories } from './styles';
+import api from '../../services/api';
 
 import logoImg from '../../assets/githublogo.svg';
 
-const Repository: React.FC = () => (
-  <Repositories>
-    <a href="teste">
-      <img
-        src="https://avatars3.githubusercontent.com/u/35804326?s=460&u=458d2ff5326896d4dc02d2ffdbd76cdca025a248&v=4"
-        alt="Henrique Omena"
-      />
-      <div>
-        <strong>title rep</strong>
-        <p> descript goes here</p>
-      </div>
+interface Repository {
+  full_name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
 
-      <FiChevronRight size={20} />
-    </a>
-  </Repositories>
-);
+const Dashboard: React.FC = () => {
+  const [newRepo, setNewRepo] = useState('');
+  const [repositories, setRepositories] = useState<Repository[]>([]);
 
-const Dashboard: React.FC = () => (
-  <>
-    <img src={logoImg} alt="logo consume github api" />
-    <Title>Dashboard</Title>
+  const handleAddRepository = async (
+    event: FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
+    event.preventDefault();
+    const response = await api.get<Repository>(`repos/${newRepo}`);
 
-    <Form>
-      <input placeholder="Digite o nome do repositorio" />
-      <button type="submit"> Pesquisar </button>
-    </Form>
-    <Repository />
-    <Repository />
-    <Repository />
-  </>
-);
+    const repository = response.data;
+
+    setRepositories([...repositories, repository]);
+    console.log(response.data);
+  };
+
+  return (
+    <>
+      <img src={logoImg} alt="logo consume github api" />
+      <Title>Dashboard</Title>
+
+      <Form onSubmit={handleAddRepository}>
+        <input
+          value={newRepo}
+          placeholder="Digite o nome do repositorio"
+          onChange={(e) => setNewRepo(e.target.value)}
+        />
+        <button type="submit"> Pesquisar </button>
+      </Form>
+      <Repositories>
+        {repositories.map((repository) => (
+          <a href="teste" key={repository.full_name}>
+            <img
+              src={repository.owner.avatar_url}
+              alt={repository.owner.login}
+            />
+            <div>
+              <strong>{repository.full_name}</strong>
+              <p>{repository.description}</p>
+            </div>
+
+            <FiChevronRight size={20} />
+          </a>
+        ))}
+      </Repositories>
+    </>
+  );
+};
 export default Dashboard;
