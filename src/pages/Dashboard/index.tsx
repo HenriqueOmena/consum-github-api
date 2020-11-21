@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import React, { FormEvent, useState } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
-import { Title, Form, Repositories } from './styles';
+import { Title, Form, Repositories, Error } from './styles';
 import api from '../../services/api';
 
 import logoImg from '../../assets/githublogo.svg';
@@ -17,18 +17,31 @@ interface Repository {
 
 const Dashboard: React.FC = () => {
   const [newRepo, setNewRepo] = useState('');
+  const [inputError, setInputError] = useState('');
   const [repositories, setRepositories] = useState<Repository[]>([]);
 
   const handleAddRepository = async (
     event: FormEvent<HTMLFormElement>,
+    // eslint-disable-next-line consistent-return
   ): Promise<void> => {
     event.preventDefault();
-    const response = await api.get<Repository>(`repos/${newRepo}`);
 
-    const repository = response.data;
+    const newRepoIsEmpty = !newRepo;
 
-    setRepositories([...repositories, repository]);
-    console.log(response.data);
+    if (newRepoIsEmpty)
+      return setInputError('Digiter o autor/nome do Repositorio');
+
+    try {
+      const response = await api.get<Repository>(`repos/${newRepo}`);
+
+      const repository = response.data;
+
+      setRepositories([...repositories, repository]);
+      setNewRepo('');
+      setInputError('');
+    } catch (error) {
+      setInputError('Repositorio não existe');
+    }
   };
 
   return (
@@ -36,7 +49,7 @@ const Dashboard: React.FC = () => {
       <img src={logoImg} alt="logo consume github api" />
       <Title>Dashboard</Title>
 
-      <Form onSubmit={handleAddRepository}>
+      <Form hasError={!!inputError} onSubmit={handleAddRepository}>
         <input
           value={newRepo}
           placeholder="Digite o nome do repositorio"
@@ -44,6 +57,9 @@ const Dashboard: React.FC = () => {
         />
         <button type="submit"> Pesquisar </button>
       </Form>
+
+      {inputError && <Error>{inputError}</Error>}
+
       <Repositories>
         {repositories.map((repository) => (
           <a href="teste" key={repository.full_name}>
