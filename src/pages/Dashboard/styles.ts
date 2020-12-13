@@ -1,6 +1,5 @@
 import styled, { css } from 'styled-components';
 import { shade } from 'polished';
-import Repository from '../Repository';
 
 interface FormProps {
   hasError: boolean;
