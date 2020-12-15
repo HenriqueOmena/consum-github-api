@@ -1,15 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouteMatch, Link } from 'react-router-dom';
 import { FiChevronsLeft, FiChevronRight } from 'react-icons/fi';
 import logoImg from '../../assets/githublogo.svg';
 import { Header, Issues, RepositoryInfo } from './style';
+import api from '../../services/api';
 
-interface Repository {
+interface RepositoryParams {
   repository: string;
 }
 
+interface Repository {
+  full_name: string;
+  description: string;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
+interface Issue {
+  id: number;
+  title: string;
+  user: {
+    login: string;
+  };
+}
+
 const Repository: React.FC = () => {
-  const { params } = useRouteMatch<Repository>();
+  const { params } = useRouteMatch<RepositoryParams>();
+  const [repository, setRepository] = useState<Repository | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    const getData = async () => {
+      const [rep, iss] = await Promise.all([
+        api.get(`repos/${params.repository}`),
+        api.get(`repos/${params.repository}/issues`),
+      ]);
+
+      setRepository(rep.data);
+      setIssues(iss.data);
+    };
+    getData();
+  }, [params.repository]);
 
   return (
     <div>
@@ -20,33 +57,31 @@ const Repository: React.FC = () => {
           Voltar
         </Link>
       </Header>
-
-      <RepositoryInfo>
-        <header>
-          <img
-            src="https://avatars3.githubusercontent.com/u/35804326?s=460&u=458d2ff5326896d4dc02d2ffdbd76cdca025a248&v=4"
-            alt="Henrique OMena"
-          />
-          <div>
-            <strong>Henrique Omena</strong>
-            <p>desc of rep</p>
-          </div>
-        </header>
-        <ul>
-          <li>
-            <strong>001</strong>
-            <span>Stars</span>
-          </li>
-          <li>
-            <strong>001</strong>
-            <span>Forks</span>
-          </li>
-          <li>
-            <strong>001</strong>
-            <span>Issues Abertas</span>
-          </li>
-        </ul>
-      </RepositoryInfo>
+      {repository && (
+        <RepositoryInfo>
+          <header>
+            <img src={repository.owner.avatar_url} alt={repository.full_name} />
+            <div>
+              <strong>{repository.full_name}</strong>
+              <p>{repository.description}</p>
+            </div>
+          </header>
+          <ul>
+            <li>
+              <strong>{repository.stargazers_count}</strong>
+              <span>Stars</span>
+            </li>
+            <li>
+              <strong>{repository.forks_count}</strong>
+              <span>Forks</span>
+            </li>
+            <li>
+              <strong>{repository.open_issues_count}</strong>
+              <span>Issues Abertas</span>
+            </li>
+          </ul>
+        </RepositoryInfo>
+      )}
 
       <Issues>
         <Link to="asddsa">
