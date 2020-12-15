@@ -24,6 +24,7 @@ interface Repository {
 interface Issue {
   id: number;
   title: string;
+  html_url: string;
   user: {
     login: string;
   };
@@ -52,7 +53,7 @@ const Repository: React.FC = () => {
     <div>
       <Header>
         <img src={logoImg} alt="logo consume github api" />
-        <Link to="/dashboard">
+        <Link to="/">
           <FiChevronsLeft size={16} />
           Voltar
         </Link>
@@ -84,24 +85,15 @@ const Repository: React.FC = () => {
       )}
 
       <Issues>
-        <Link to="asddsa">
-          <div>
-            <strong>asdasd</strong>
-            <p>xzcxczxczxc</p>
-          </div>
-
-          <FiChevronRight size={20} />
-        </Link>
-      </Issues>
-      <Issues>
-        <Link to="asddsa">
-          <div>
-            <strong>asdasd</strong>
-            <p>xzcxczxczxc</p>
-          </div>
-
-          <FiChevronRight size={20} />
-        </Link>
+        {issues.map((issue) => (
+          <a href={issue.html_url} key={issue.id} target="blank">
+            <div>
+              <strong>{issue.title}</strong>
+              <p>{issue.user.login}</p>
+            </div>
+            <FiChevronRight size={20} />
+          </a>
+        ))}
       </Issues>
     </div>
   );
