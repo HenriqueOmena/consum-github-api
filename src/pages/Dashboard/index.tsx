@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { Title, Form, Repositories, Error } from './styles';
@@ -19,7 +19,16 @@ interface Repository {
 const Dashboard: React.FC = () => {
   const [newRepo, setNewRepo] = useState('');
   const [inputError, setInputError] = useState('');
-  const [repositories, setRepositories] = useState<Repository[]>([]);
+  const [repositories, setRepositories] = useState<Repository[]>(() => {
+    const storageRpositories = localStorage.getItem('repositories');
+    if (storageRpositories) return JSON.parse(storageRpositories);
+
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('repositories', JSON.stringify(repositories));
+  }, [repositories]);
 
   const handleAddRepository = async (
     event: FormEvent<HTMLFormElement>,
