@@ -36,8 +36,8 @@ const Repository: React.FC = () => {
   const { params } = useRouteMatch<RepositoryParams>();
   const [repository, setRepository] = useState<Repository | null>(null);
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = React.useState(1);
+  const [rowsPerPage, setRowsPerPage] = React.useState(2);
 
   const handleChangePage = (
     _event: unknown,
@@ -57,14 +57,15 @@ const Repository: React.FC = () => {
     const getData = async () => {
       const [rep, iss] = await Promise.all([
         api.get(`repos/${params.repository}`),
-        api.get(`repos/${params.repository}/issues`),
+        api.get(
+          `repos/${params.repository}/issues?per_page=${rowsPerPage}&page=${page}`,
+        ),
       ]);
-
       setRepository(rep.data);
       setIssues(iss.data);
     };
     getData();
-  }, [params.repository]);
+  }, [params.repository, rowsPerPage, page]);
 
   return (
     <div>
@@ -98,17 +99,23 @@ const Repository: React.FC = () => {
               <span>Issues Abertas</span>
             </li>
           </ul>
+          <TablePagination
+            component="div"
+            count={repository.open_issues_count}
+            page={page}
+            onChangePage={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            labelRowsPerPage="Results per Page"
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+            rowsPerPageOptions={[2, 5, 10, 20, 50, 100]}
+            style={{
+              display: 'flex',
+              alignItems: 'left',
+              paddingLeft: 0,
+            }}
+          />
         </RepositoryInfo>
       )}
-
-      <TablePagination
-        component="div"
-        count={681}
-        page={page}
-        onChangePage={handleChangePage}
-        rowsPerPage={rowsPerPage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
 
       <Issues>
         {issues.map((issue) => (
