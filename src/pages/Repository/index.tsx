@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import React, { useEffect, useState } from 'react';
 import { useRouteMatch, Link } from 'react-router-dom';
 import { FiChevronsLeft, FiChevronRight } from 'react-icons/fi';
+import { TablePagination } from '@material-ui/core';
 import logoImg from '../../assets/githublogo.svg';
 import { Header, Issues, RepositoryInfo } from './style';
 import api from '../../services/api';
@@ -34,9 +36,24 @@ const Repository: React.FC = () => {
   const { params } = useRouteMatch<RepositoryParams>();
   const [repository, setRepository] = useState<Repository | null>(null);
   const [issues, setIssues] = useState<Issue[]>([]);
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (
+    _event: unknown,
+    newPage: React.SetStateAction<number>,
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: { target: { value: string } }) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+
     const getData = async () => {
       const [rep, iss] = await Promise.all([
         api.get(`repos/${params.repository}`),
@@ -83,6 +100,15 @@ const Repository: React.FC = () => {
           </ul>
         </RepositoryInfo>
       )}
+
+      <TablePagination
+        component="div"
+        count={681}
+        page={page}
+        onChangePage={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+      />
 
       <Issues>
         {issues.map((issue) => (
