@@ -70,7 +70,9 @@ const Repository: React.FC = () => {
   return (
     <div>
       <Header>
-        <img src={logoImg} alt="logo consume github api" />
+        <Link to="/">
+          <img src={logoImg} alt="logo consume github api" />
+        </Link>
         <Link to="/">
           <FiChevronsLeft size={16} />
           Voltar
